@@ -1,19 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useImperativeHandle } from "react";
 import GridLayout from "react-grid-layout";
+import { useDroppable } from "@dnd-kit/core";
 
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
-const Canvas = () => {
-  //   const ResponsiveGridLayout = WidthProvider(GridLayout);
+import { Trash2 } from "lucide-react";
 
-  const [layout, setLayout] = useState([
-    { i: "1", x: 0, y: 0, w: 3, h: 2 },
-    { i: "2", x: 3, y: 0, w: 3, h: 2 },
-  ]);
+const Canvas = ({ id, items, layout, setLayout, onDelete }) => {
+  //   const ResponsiveGridLayout = WidthProvider(GridLayout);
+  const { setNodeRef } = useDroppable({ id });
 
   return (
-    <div className="flex-1 bg-gray-100 p-4 border-r h-screen overflow-auto">
+    <div
+      className="flex-1 bg-gray-100 p-4 border-r h-screen overflow-auto"
+      ref={setNodeRef}
+    >
       <h3 className="text-lg font-semibold mb-4">Canvas</h3>
 
       <GridLayout
@@ -23,14 +25,32 @@ const Canvas = () => {
         width={1050}
         onLayoutChange={(newLayout) => setLayout(newLayout)}
       >
-        {layout.map((item) => (
-          <div
-            key={item.i}
-            className="bg-white border rounded shadow flex items-center justify-center"
-          >
-            {item.i}
-          </div>
-        ))}
+        {layout.map((lay) => {
+          const item = items.find((it) => it.id === lay.i);
+
+          return (
+            <div
+              key={lay.i}
+              className="group relative bg-white border rounded shadow flex items-center justify-center"
+            >
+              {/* ❌ Delete button (visible on hover) */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(lay.i);
+                }}
+                className="absolute top-1 right-1 hidden group-hover:flex items-center justify-center p-1 rounded hover:bg-gray-200 cursor-pointer"
+              >
+                <Trash2
+                  size={16}
+                  className="text-gray-500 hover:text-red-500"
+                />
+              </button>
+
+              {item?.type}
+            </div>
+          );
+        })}
       </GridLayout>
     </div>
   );
